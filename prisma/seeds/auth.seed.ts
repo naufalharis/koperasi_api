@@ -3,72 +3,52 @@ import * as bcrypt from 'bcrypt';
 
 const prisma = new PrismaClient();
 
-// Ensure required environment variables are set
-if (!process.env.DATABASE_URL) {
-  throw new Error('DATABASE_URL is not set in environment variables');
-}
-
 async function main() {
-  // Hash password function
   const hashPassword = async (password: string): Promise<string> => {
     const saltRounds = 10;
     return await bcrypt.hash(password, saltRounds);
   };
 
-  // Create seed data for User table (merged auth and user data)
-  const userData = [
-    {
-      id: 'c7b3d8e0-5e0b-11eb-ae93-0242ac130002',
-      username: 'superadmin',
-      email: 'maulanayusuf.ena@gmail.com',
-      phone: '081317897551',
-      password: await hashPassword('password123'),
-      role: 'super_admin',
-      first_name: 'Super',
-      last_name: 'Admin',
-      status: 'active',
-    },
-    // {
-    //   id: 'c7b3d8e0-5e0b-11eb-ae93-0242ac130003',
-    //   username: 'user1',
-    //   email: 'user1@example.com',
-    //   phone: '081234567891',
-    //   password: await hashPassword('password123'),
-    //   role: 'user',
-    //   first_name: 'John',
-    //   last_name: 'Doe',
-    //   status: 'active',
-    // },
-    // {
-    //   id: 'c7b3d8e0-5e0b-11eb-ae93-0242ac130004',
-    //   username: 'user2',
-    //   email: 'user2@example.com',
-    //   phone: '081234567892',
-    //   password: await hashPassword('password123'),
-    //   role: 'user',
-    //   first_name: 'Jane',
-    //   last_name: 'Smith',
-    //   status: 'active',
-    // },
-  ];
+  // === Pastikan jabatan "Admin" ada ===
+  let jabatan = await prisma.jabatan.findFirst({
+    where: { nama: 'Admin' },
+  });
 
-  // Create User records
-  for (const user of userData) {
-    await prisma.user.upsert({
-      where: { username: user.username },
-      update: user,
-      create: user,
+  if (!jabatan) {
+    jabatan = await prisma.jabatan.create({
+      data: { nama: 'Admin' },
     });
   }
 
-  console.log('Auth seed data created successfully');
+  // === Buat user admin ===
+  const adminEmail = 'admin@koperasi.com';
+  const existingAdmin = await prisma.anggota.findUnique({
+    where: { email: adminEmail },
+  });
+
+  if (!existingAdmin) {
+    const anggota = await prisma.anggota.create({
+      data: {
+        nama: 'Admin Koperasi',
+        email: adminEmail,
+        password: await hashPassword('password123'),
+        id_jabatan: jabatan.id,
+        alamat: 'Jl. Merdeka No. 1',
+        no_hp: '08123456789',
+      },
+    });
+    console.log('✅ Admin baru dibuat:', anggota);
+  } else {
+    console.log('ℹ️ Admin sudah ada, skip create.');
+  }
 }
 
 main()
-  .catch((e) => {
-    console.error(e);
+  .catch((err) => {
+    console.error('❌ Error saat seed:', err);
     process.exit(1);
   })
-  .finally(() => {
-    prisma.$disconnect();
+  .finally(async () => {
+    await prisma.$disconnect();
   });
+

@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+﻿import { Module } from '@nestjs/common';
 import { QueryBuilderService } from './services/query-builder.service';
 import { StorageModule } from './storage/storage.module';
 
@@ -8,3 +8,5 @@ import { StorageModule } from './storage/storage.module';
   exports: [QueryBuilderService, StorageModule],
 })
 export class CommonModule {}
+
+

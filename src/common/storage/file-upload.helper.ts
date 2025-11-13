@@ -1,4 +1,4 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+﻿import { Injectable, BadRequestException } from '@nestjs/common';
 import {
   S3StorageService,
   S3UploadOptions,
@@ -266,3 +266,5 @@ export class FileUploadHelper {
     } as FileUploadOptions,
   };
 }
+
+

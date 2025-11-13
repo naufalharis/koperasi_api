@@ -1,4 +1,4 @@
-import { applyDecorators, UseInterceptors } from '@nestjs/common';
+﻿import { applyDecorators, UseInterceptors } from '@nestjs/common';
 import {
   FileInterceptor,
   FilesInterceptor,
@@ -105,3 +105,5 @@ export function UploadAvatar(fieldName: string) {
 
   return UploadSingleFile(fieldName, options);
 }
+
+

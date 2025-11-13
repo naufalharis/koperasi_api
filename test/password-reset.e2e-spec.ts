@@ -20,7 +20,7 @@ describe('Password Reset (e2e)', () => {
 
   afterEach(async () => {
     // Clean up test data
-    await prismaService.db.auth.deleteMany({
+    await prismaService.auth.deleteMany({
       where: {
         email: {
           contains: 'test',
@@ -154,13 +154,13 @@ describe('Password Reset (e2e)', () => {
         .expect(201);
 
       // Manually create an expired token
-      const auth = await prismaService.db.auth.findUnique({
+      const auth = await prismaService.auth.findUnique({
         where: { email: 'test3@example.com' },
       });
 
       const expiredToken = 'expired-token-123';
       if (auth) {
-        await prismaService.db.auth.update({
+        await prismaService.auth.update({
           where: { id: auth.id },
           data: {
             password_reset_token: expiredToken,
@@ -183,3 +183,4 @@ describe('Password Reset (e2e)', () => {
     });
   });
 });
+

@@ -82,3 +82,4 @@ const res2 = await api.apiCall('/properties/with-ready-units', { method: 'POST',
 const res3 = await api.apiCall('/properties/advanced-search', { method: 'POST', body: advancedSearch });
 const res4 = await api.apiCall('/rental-units/comprehensive-search', { method: 'POST', body: comprehensiveSearch });
 */
+

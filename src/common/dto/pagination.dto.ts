@@ -1,4 +1,4 @@
-import {
+﻿import {
   IsOptional,
   IsNumber,
   IsString,
@@ -122,3 +122,5 @@ export interface QueryBuilderOptions {
   defaultSelect?: Record<string, any>;
   allowedSelectFields?: string[];
 }
+
+

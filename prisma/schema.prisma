@@ -1,3 +1,6 @@
+// =======================
+// ⚙️ Prisma Configuration
+// =======================
 generator client {
   provider = "prisma-client-js"
 }
@@ -7,85 +10,128 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id                     String  @id @default(uuid()) @db.Uuid()
-  username               String  @unique @db.VarChar(50)
-  email                  String  @unique @db.VarChar(70)
-  phone                  String? @db.VarChar(20)
-  password               String
-  role                   String /// super_admin, perhutani, admin
-  status                 String? @default("active") @db.VarChar(10)
-  password_reset_token   String?
-  password_reset_expires Int?
-  created_at             Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())"))
-  updated_at             Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())"))
-  deleted_at             Int?
-  created_by             String? @db.Uuid()
-  updated_by             String? @db.Uuid()
-  deleted_by             String? @db.Uuid()
+// =======================
+// 👥 Anggota & Jabatan
+// =======================
+model Jabatan {
+  id       Int       @id @default(autoincrement())
+  nama     String
+  anggota  Anggota[]
 
-  // User fields
-  first_name String
-  last_name  String?
-  odtw_id    String? @db.Uuid()
-  odtw       Odtw?   @relation(fields: [odtw_id], references: [id])
-
-  @@index([username])
-  @@index([email])
-  @@index([phone])
-  @@map("users")
+  @@map("jabatan")
 }
 
-model Odtw {
-  id             String  @id @default(uuid()) @db.Uuid()
-  odtw_code      String  @unique @db.VarChar(3)
-  name           String
-  ticket_price   Int?
-  address        String?
-  village        String?
-  district       String?
-  city           String?
-  province       String?
-  email          String? @unique
-  phone          String? @unique
-  latitude       String?
-  longitude      String?
-  status         String  @default("active")
-  webhook_url    String? @db.Text()
-  max_device     Int?    @default(1)
-  bank_name      String?
-  account_name   String?
-  account_number String?
-  created_at     Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())::integer"))
-  updated_at     Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())::integer"))
-  deleted_at     Int?
-  created_by     String? @db.Uuid()
-  updated_by     String? @db.Uuid()
-  deleted_by     String? @db.Uuid()
+model Anggota {
+  id          Int        @id @default(autoincrement())
+  id_jabatan  Int
+  nama        String
+  email       String     @unique
+  password    String
+  alamat      String?
+  no_hp       String?
 
-  users          User[]
-  knowledges     Knowledge[]
+  // Relasi
+  jabatan     Jabatan    @relation(fields: [id_jabatan], references: [id])
+  tabungan    Tabungan[]
+  pinjaman    Pinjaman[]
+  penarikan   Penarikan[]
 
-  @@map("odtws")
+  @@map("anggota")
 }
 
-model Knowledge {
-  id         String  @id @default(uuid()) @db.Uuid()
-  odtw_id    String  @db.Uuid()
-  topic_code String  @unique @db.VarChar(6)
-  topic      String
-  content    String
-  status     String
-  created_at Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())::integer"))
-  updated_at Int     @default(dbgenerated("EXTRACT(EPOCH FROM now())::integer"))
-  deleted_at Int?
-  created_by String? @db.Uuid()
-  updated_by String? @db.Uuid()
-  deleted_by String? @db.Uuid()
+// =======================
+// 💰 Tabungan & Penarikan
+// =======================
+model KategoriSimpanan {
+  id        Int         @id @default(autoincrement())
+  nama      String
+  tabungan  Tabungan[]
 
-  //relation
-  odtw Odtw @relation(fields: [odtw_id], references: [id])
+  @@map("kategori_simpanan")
+}
 
-  @@index([odtw_id])
-  @@map("knowledges")
+model Tabungan {
+  id                    Int              @id @default(autoincrement())
+  id_anggota            Int
+  id_kategori_simpanan  Int
+  tanggal               DateTime
+  jumlah                Float
+  note                  String?
+
+  // Relasi
+  anggota               Anggota          @relation(fields: [id_anggota], references: [id])
+  kategoriSimpanan      KategoriSimpanan @relation(fields: [id_kategori_simpanan], references: [id])
+  penarikan             Penarikan[]
+
+  @@map("tabungan")
+}
+
+model Penarikan {
+  id          Int       @id @default(autoincrement())
+  id_anggota  Int
+  id_tabungan Int
+  tanggal     DateTime
+  jumlah      Float
+  note        String?
+
+  // Relasi
+  anggota     Anggota   @relation(fields: [id_anggota], references: [id])
+  tabungan    Tabungan  @relation(fields: [id_tabungan], references: [id])
+
+  @@map("penarikan")
+}
+
+// =======================
+// 💸 Pinjaman & Angsuran
+// =======================
+model KategoriJangkaWaktu {
+  id        Int         @id @default(autoincrement())
+  nama      String
+  pinjaman  Pinjaman[]
+
+  @@map("kategori_jangka_waktu")
+}
+
+model Pinjaman {
+  id                    Int                 @id @default(autoincrement())
+  id_anggota            Int
+  id_jangka_waktu       Int
+  tanggal               DateTime
+  jumlah                Float
+  status                String
+  note                  String?
+  tanggal_jatuh_tempo   DateTime
+
+  // Relasi
+  anggota               Anggota             @relation(fields: [id_anggota], references: [id])
+  jangkaWaktu           KategoriJangkaWaktu @relation(fields: [id_jangka_waktu], references: [id])
+  angsuran              Angsuran[]
+
+  @@map("pinjaman")
+}
+
+model Angsuran {
+  id                  Int       @id @default(autoincrement())
+  pinjaman_id         Int
+  tanggal_pembayaran  DateTime
+  jumlah_pembayaran   Float
+  sisa_pinjaman       Float
+  note                String?
+
+  // Relasi
+  pinjaman            Pinjaman  @relation(fields: [pinjaman_id], references: [id])
+
+  @@map("angsuran")
+}
+
+// =======================
+// 🏦 Kas Koperasi
+// =======================
+model KasKoperasi {
+  id       Int       @id @default(autoincrement())
+  nominal  Float
+  tanggal  DateTime
+  note     String?
+
+  @@map("kas_koperasi")
 }

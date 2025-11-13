@@ -1,4 +1,4 @@
-import {
+﻿import {
   IsEmail,
   IsNotEmpty,
   IsString,
@@ -99,3 +99,5 @@ export class ResetPasswordDto {
   @IsNotEmpty()
   newPassword: string;
 }
+
+

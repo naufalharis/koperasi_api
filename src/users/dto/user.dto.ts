@@ -1,4 +1,4 @@
-import {
+﻿import {
   IsEmail,
   IsNotEmpty,
   IsString,
@@ -90,3 +90,5 @@ export class UpdateUserDto {
   @IsEnum(UserStatus)
   status?: UserStatus;
 }
+
+

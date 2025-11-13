@@ -1,4 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+﻿/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-call */
 
@@ -28,3 +28,5 @@ export class RolesGuard implements CanActivate {
     return requiredRoles.some((role) => user.role?.includes(role));
   }
 }
+
+
