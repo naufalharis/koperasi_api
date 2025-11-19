@@ -14,23 +14,21 @@ export class UserService {
 
   async findById(id: number): Promise<Anggota | null> {
     return this.prisma.anggota.findUnique({
-      where: { id },
-      include: { jabatan: true },
+      where: { id: String(id) },
+      include: { jabatan: true }
     });
   }
 
   async update(id: number, data: Partial<Anggota>): Promise<Anggota> {
     return this.prisma.anggota.update({
-      where: { id },
+       where: { id: String(id) },
       data,
     });
   }
 
   async delete(id: number): Promise<Anggota> {
     return this.prisma.anggota.delete({
-      where: { id },
+       where: { id: String(id) },
     });
   }
 }
-
-

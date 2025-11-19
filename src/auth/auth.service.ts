@@ -30,7 +30,7 @@ export class AuthService {
     nama: string;
     email: string;
     password: string;
-    id_jabatan: number;
+    id_jabatan: string;
     alamat?: string;
     no_hp?: string;
   }) {
@@ -39,6 +39,46 @@ export class AuthService {
       data: { ...data, password: hashed },
     });
   }
+
+  async findAll() {
+  return this.prisma.anggota.findMany({
+    include: { jabatan: true },
+  });
+}
+
+async findById(id: string) {
+  return this.prisma.anggota.findUnique({
+    where: { id },
+    include: { jabatan: true },
+  });
+}
+
+async update(id: string, data: {
+  nama?: string;
+  email?: string;
+  password?: string;
+  id_jabatan?: string;
+  alamat?: string;
+  no_hp?: string;
+}) {
+  // Hash password jika ikut diupdate
+  let updateData: any = { ...data };
+
+  if (data.password) {
+    updateData.password = await bcrypt.hash(data.password, 10);
+  }
+
+  return this.prisma.anggota.update({
+    where: { id },
+    data: updateData,
+  });
+}
+
+async delete(id: string) {
+  return this.prisma.anggota.delete({
+    where: { id },
+  });
 }
 
 
+}

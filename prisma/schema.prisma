@@ -14,24 +14,34 @@ datasource db {
 // 👥 Anggota & Jabatan
 // =======================
 model Jabatan {
-  id       Int       @id @default(autoincrement())
-  nama     String
-  anggota  Anggota[]
+  id          String     @id @default(uuid())
+  nama        String
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?  @updatedAt
+  created_by  String?
+  updated_by  String?
+
+  anggota     Anggota[]
 
   @@map("jabatan")
 }
 
 model Anggota {
-  id          Int        @id @default(autoincrement())
-  id_jabatan  Int
+  id          String     @id @default(uuid())
+  id_jabatan  String
   nama        String
-  email       String     @unique
+  email       String      @unique
   password    String
   alamat      String?
   no_hp       String?
 
-  // Relasi
-  jabatan     Jabatan    @relation(fields: [id_jabatan], references: [id])
+  created_at  DateTime    @default(now())
+  updated_at  DateTime?   @updatedAt
+  created_by  String?
+  updated_by  String?
+
+  jabatan     Jabatan     @relation(fields: [id_jabatan], references: [id])
   tabungan    Tabungan[]
   pinjaman    Pinjaman[]
   penarikan   Penarikan[]
@@ -43,40 +53,52 @@ model Anggota {
 // 💰 Tabungan & Penarikan
 // =======================
 model KategoriSimpanan {
-  id        Int         @id @default(autoincrement())
-  nama      String
-  tabungan  Tabungan[]
+  id          String     @id @default(uuid())
+  nama        String
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?  @updatedAt
+  created_by  String?
+  updated_by  String?
+
+  tabungan    Tabungan[]
 
   @@map("kategori_simpanan")
 }
 
 model Tabungan {
-  id                    Int              @id @default(autoincrement())
-  id_anggota            Int
-  id_kategori_simpanan  Int
+  id                    String            @id @default(uuid())
+  id_anggota            String
+  id_kategori_simpanan  String
   tanggal               DateTime
   jumlah                Float
-  note                  String?
 
-  // Relasi
-  anggota               Anggota          @relation(fields: [id_anggota], references: [id])
-  kategoriSimpanan      KategoriSimpanan @relation(fields: [id_kategori_simpanan], references: [id])
+  created_at            DateTime          @default(now())
+  updated_at            DateTime?         @updatedAt
+  created_by            String?
+  updated_by            String?
+
+  anggota               Anggota           @relation(fields: [id_anggota], references: [id])
+  kategoriSimpanan      KategoriSimpanan  @relation(fields: [id_kategori_simpanan], references: [id])
   penarikan             Penarikan[]
 
   @@map("tabungan")
 }
 
 model Penarikan {
-  id          Int       @id @default(autoincrement())
-  id_anggota  Int
-  id_tabungan Int
+  id          String     @id @default(uuid())
+  id_anggota  String
+  id_tabungan String
   tanggal     DateTime
   jumlah      Float
-  note        String?
 
-  // Relasi
-  anggota     Anggota   @relation(fields: [id_anggota], references: [id])
-  tabungan    Tabungan  @relation(fields: [id_tabungan], references: [id])
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?  @updatedAt
+  created_by  String?
+  updated_by  String?
+
+  anggota     Anggota    @relation(fields: [id_anggota], references: [id])
+  tabungan    Tabungan   @relation(fields: [id_tabungan], references: [id])
 
   @@map("penarikan")
 }
@@ -85,24 +107,35 @@ model Penarikan {
 // 💸 Pinjaman & Angsuran
 // =======================
 model KategoriJangkaWaktu {
-  id        Int         @id @default(autoincrement())
-  nama      String
-  pinjaman  Pinjaman[]
+  id          String     @id @default(uuid())
+  nama        String
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime?  @updatedAt
+  created_by  String?
+  updated_by  String?
+
+  pinjaman    Pinjaman[]
 
   @@map("kategori_jangka_waktu")
 }
 
 model Pinjaman {
-  id                    Int                 @id @default(autoincrement())
-  id_anggota            Int
-  id_jangka_waktu       Int
+  id                    String              @id @default(uuid())
+  id_anggota            String
+  id_jangka_waktu       String
   tanggal               DateTime
   jumlah                Float
   status                String
-  note                  String?
   tanggal_jatuh_tempo   DateTime
 
-  // Relasi
+  deleted_at            DateTime?
+
+  created_at            DateTime            @default(now())
+  updated_at            DateTime?           @updatedAt
+  created_by            String?
+  updated_by            String?
+
   anggota               Anggota             @relation(fields: [id_anggota], references: [id])
   jangkaWaktu           KategoriJangkaWaktu @relation(fields: [id_jangka_waktu], references: [id])
   angsuran              Angsuran[]
@@ -111,15 +144,18 @@ model Pinjaman {
 }
 
 model Angsuran {
-  id                  Int       @id @default(autoincrement())
-  pinjaman_id         Int
+  id                  String     @id @default(uuid())
+  pinjaman_id         String
   tanggal_pembayaran  DateTime
   jumlah_pembayaran   Float
   sisa_pinjaman       Float
-  note                String?
 
-  // Relasi
-  pinjaman            Pinjaman  @relation(fields: [pinjaman_id], references: [id])
+  created_at          DateTime   @default(now())
+  updated_at          DateTime?  @updatedAt
+  created_by          String?
+  updated_by          String?
+
+  pinjaman            Pinjaman   @relation(fields: [pinjaman_id], references: [id])
 
   @@map("angsuran")
 }
@@ -128,10 +164,14 @@ model Angsuran {
 // 🏦 Kas Koperasi
 // =======================
 model KasKoperasi {
-  id       Int       @id @default(autoincrement())
-  nominal  Float
-  tanggal  DateTime
-  note     String?
+  id          String    @id @default(uuid())
+  nominal     Float
+  tanggal     DateTime
+
+  created_at  DateTime  @default(now())
+  updated_at  DateTime? @updatedAt
+  created_by  String?
+  updated_by  String?
 
   @@map("kas_koperasi")
 }
