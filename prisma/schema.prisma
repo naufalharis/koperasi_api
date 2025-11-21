@@ -11,6 +11,14 @@ datasource db {
 }
 
 // =======================
+// 🧱 ENUMS
+// =======================
+enum StatusPinjaman {
+  LUNAS
+  BELUM_LUNAS
+}
+
+// =======================
 // 👥 Anggota & Jabatan
 // =======================
 model Jabatan {
@@ -126,7 +134,7 @@ model Pinjaman {
   id_jangka_waktu       String
   tanggal               DateTime
   jumlah                Float
-  status                String
+  status                StatusPinjaman      @default(BELUM_LUNAS)
   tanggal_jatuh_tempo   DateTime
 
   deleted_at            DateTime?
