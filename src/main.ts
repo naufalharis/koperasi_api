@@ -16,7 +16,7 @@ async function bootstrap() {
     credentials: true,
   });
 
-  const port = process.env.PORT ?? 3333;
+const port = process.env.PORT ?? 3334; // kalau mau 3334
   await app.listen(port);
   console.log(`🚀 Server running on http://localhost:${port}`);
 }
