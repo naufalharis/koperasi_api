@@ -172,8 +172,7 @@ model KasKoperasi {
   updated_at  DateTime? @updatedAt
   created_by  String?
   updated_by  String?
+  deleted_at  DateTime?
 
   @@map("kas_koperasi")
 }
-
-
