@@ -13,7 +13,7 @@ export class KasKoperasiService {
     const data: any = {
       nominal: createKasDto.nominal,
       tanggal: new Date(createKasDto.tanggal),
-      note: createKasDto.note ?? null,
+      // note: createKasDto.note ?? null,
       created_by: userId ?? null,
     };
     return this.prisma.kasKoperasi.create({ data });
@@ -85,7 +85,7 @@ export class KasKoperasiService {
     const data: any = {};
     if (updateKasDto.nominal !== undefined) data.nominal = updateKasDto.nominal;
     if (updateKasDto.tanggal !== undefined) data.tanggal = new Date(updateKasDto.tanggal as any);
-    if (updateKasDto.note !== undefined) data.note = updateKasDto.note;
+    // if (updateKasDto.note !== undefined) data.note = updateKasDto.note;
 
     data.updated_by = userId ?? null;
 
