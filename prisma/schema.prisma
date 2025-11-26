@@ -25,6 +25,10 @@ model Jabatan {
   id          String     @id @default(uuid())
   nama        String
 
+  // 🔥 Soft delete fields
+  deleted_at  DateTime?
+  deleted_by  String?
+
   created_at  DateTime   @default(now())
   updated_at  DateTime?  @updatedAt
   created_by  String?
@@ -34,6 +38,8 @@ model Jabatan {
 
   @@map("jabatan")
 }
+
+
 
 model Anggota {
   id          String     @id @default(uuid())
