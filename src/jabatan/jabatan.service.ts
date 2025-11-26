@@ -8,26 +8,21 @@ export class JabatanService {
   constructor(private prisma: PrismaService) {}
 
   create(data: CreateJabatanDto) {
-    return this.prisma.jabatan.create({
-      data,
-    });
+    return this.prisma.jabatan.create({ data });
   }
 
   findAll() {
     return this.prisma.jabatan.findMany({
-      include: {
-        anggota: true,
-      },
+      where: { deleted_at: null },
+      include: { anggota: true },
       orderBy: { created_at: 'desc' },
     });
   }
 
   findOne(id: string) {
-    return this.prisma.jabatan.findUnique({
-      where: { id },
-      include: {
-        anggota: true,
-      },
+    return this.prisma.jabatan.findFirst({
+      where: { id, deleted_at: null },
+      include: { anggota: true },
     });
   }
 
@@ -38,6 +33,29 @@ export class JabatanService {
     });
   }
 
+  // 🔥 Soft Delete
+  async softDelete(id: string, userId: string) {
+    return this.prisma.jabatan.update({
+      where: { id },
+      data: {
+        deleted_at: new Date(),
+        deleted_by: userId,
+      },
+    });
+  }
+
+  // 🔄 Restore (WAJIB ADA untuk controller)
+  async restore(id: string) {
+    return this.prisma.jabatan.update({
+      where: { id },
+      data: {
+        deleted_at: null,
+        deleted_by: null,
+      },
+    });
+  }
+
+  // ❌ Hard delete
   remove(id: string) {
     return this.prisma.jabatan.delete({
       where: { id },
