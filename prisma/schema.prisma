@@ -1,7 +1,7 @@
 // =======================
 // ⚙️ Prisma Configuration
 // =======================
-generator client {
+generator client { 
   provider = "prisma-client-js"
 }
 
@@ -60,6 +60,10 @@ model KategoriSimpanan {
   updated_at  DateTime?  @updatedAt
   created_by  String?
   updated_by  String?
+
+  // 🔥 DITAMBAHKAN
+  deleted_at  DateTime?
+  deleted_by  String?
 
   tabungan    Tabungan[]
 
