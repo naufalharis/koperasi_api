@@ -18,7 +18,7 @@ model Jabatan {
   nama        String
 
   created_at  DateTime   @default(now())
-  updated_at  DateTime?  @updatedAt
+  updated_at  DateTime   @updatedAt
   created_by  String?
   updated_by  String?
 
@@ -31,17 +31,19 @@ model Anggota {
   id          String     @id @default(uuid())
   id_jabatan  String
   nama        String
-  email       String      @unique
+  email       String     @unique
   password    String
   alamat      String?
   no_hp       String?
 
-  created_at  DateTime    @default(now())
-  updated_at  DateTime?   @updatedAt
+  deleted_at  DateTime?  // Soft delete untuk anggota
+
+  created_at  DateTime   @default(now())
+  updated_at  DateTime   @updatedAt
   created_by  String?
   updated_by  String?
 
-  jabatan     Jabatan     @relation(fields: [id_jabatan], references: [id])
+  jabatan     Jabatan     @relation(fields: [id_jabatan], references: [id], onDelete: Cascade)
   tabungan    Tabungan[]
   pinjaman    Pinjaman[]
   penarikan   Penarikan[]
@@ -54,10 +56,10 @@ model Anggota {
 // =======================
 model KategoriSimpanan {
   id          String     @id @default(uuid())
-  nama        String
+  nama        String     @unique
 
   created_at  DateTime   @default(now())
-  updated_at  DateTime?  @updatedAt
+  updated_at  DateTime   @updatedAt
   created_by  String?
   updated_by  String?
 
@@ -74,12 +76,12 @@ model Tabungan {
   jumlah                Float
 
   created_at            DateTime          @default(now())
-  updated_at            DateTime?         @updatedAt
+  updated_at            DateTime          @updatedAt
   created_by            String?
   updated_by            String?
 
-  anggota               Anggota           @relation(fields: [id_anggota], references: [id])
-  kategoriSimpanan      KategoriSimpanan  @relation(fields: [id_kategori_simpanan], references: [id])
+  anggota               Anggota           @relation(fields: [id_anggota], references: [id], onDelete: Cascade)
+  kategoriSimpanan      KategoriSimpanan  @relation(fields: [id_kategori_simpanan], references: [id], onDelete: Restrict)
   penarikan             Penarikan[]
 
   @@map("tabungan")
@@ -93,12 +95,12 @@ model Penarikan {
   jumlah      Float
 
   created_at  DateTime   @default(now())
-  updated_at  DateTime?  @updatedAt
+  updated_at  DateTime   @updatedAt
   created_by  String?
   updated_by  String?
 
-  anggota     Anggota    @relation(fields: [id_anggota], references: [id])
-  tabungan    Tabungan   @relation(fields: [id_tabungan], references: [id])
+  anggota     Anggota    @relation(fields: [id_anggota], references: [id], onDelete: Cascade)
+  tabungan    Tabungan   @relation(fields: [id_tabungan], references: [id], onDelete: Cascade)
 
   @@map("penarikan")
 }
@@ -108,13 +110,13 @@ model Penarikan {
 // =======================
 model KategoriJangkaWaktu {
   id          String     @id @default(uuid())
-  nama        String
+  nama        String     @unique
 
   created_at  DateTime   @default(now())
-  updated_at  DateTime?  @updatedAt
+  updated_at  DateTime   @updatedAt
   created_by  String?
   updated_by  String?
-
+  deleted_at DateTime?
   pinjaman    Pinjaman[]
 
   @@map("kategori_jangka_waktu")
@@ -129,15 +131,15 @@ model Pinjaman {
   status                String
   tanggal_jatuh_tempo   DateTime
 
-  deleted_at            DateTime?
+  deleted_at            DateTime?           // Soft delete untuk pinjaman
 
   created_at            DateTime            @default(now())
-  updated_at            DateTime?           @updatedAt
+  updated_at            DateTime            @updatedAt
   created_by            String?
   updated_by            String?
 
-  anggota               Anggota             @relation(fields: [id_anggota], references: [id])
-  jangkaWaktu           KategoriJangkaWaktu @relation(fields: [id_jangka_waktu], references: [id])
+  anggota               Anggota             @relation(fields: [id_anggota], references: [id], onDelete: Cascade)
+  jangkaWaktu           KategoriJangkaWaktu @relation(fields: [id_jangka_waktu], references: [id], onDelete: Restrict)
   angsuran              Angsuran[]
 
   @@map("pinjaman")
@@ -151,11 +153,11 @@ model Angsuran {
   sisa_pinjaman       Float
 
   created_at          DateTime   @default(now())
-  updated_at          DateTime?  @updatedAt
+  updated_at          DateTime   @updatedAt
   created_by          String?
   updated_by          String?
 
-  pinjaman            Pinjaman   @relation(fields: [pinjaman_id], references: [id])
+  pinjaman            Pinjaman   @relation(fields: [pinjaman_id], references: [id], onDelete: Cascade)
 
   @@map("angsuran")
 }
@@ -169,11 +171,29 @@ model KasKoperasi {
   tanggal     DateTime
 
   created_at  DateTime  @default(now())
-  updated_at  DateTime? @updatedAt
+  updated_at  DateTime  @updatedAt
   created_by  String?
   updated_by  String?
 
   @@map("kas_koperasi")
 }
 
+// =======================
+// 👤 User
+// =======================
+model User {
+  id        String    @id @default(uuid())
+  name      String
+  email     String    @unique
+  password  String
+  role      String
 
+  deleted_at DateTime? // Soft delete untuk user
+
+  created_at DateTime  @default(now())
+  updated_at DateTime  @updatedAt
+  created_by String?
+  updated_by String?
+
+  @@map("user")
+}

@@ -19,16 +19,23 @@ export class KategoriJangkaWaktuController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.service.findOne(id); // ❌Tidak pakai +id
+    return this.service.findOne(id);
   }
 
   @Patch(':id')
   update(@Param('id') id: string, @Body() dto: UpdateKategoriJangkaWaktuDto) {
-    return this.service.update(id, dto); // ❌Tidak pakai +id
+    return this.service.update(id, dto);
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(id); // ❌Tidak pakai +id
+  // SOFT DELETE
+  @Patch(':id/soft')
+  softDelete(@Param('id') id: string) {
+    return this.service.remove(id);
+  }
+
+  // HARD DELETE
+  @Delete(':id/hard')
+  hardDelete(@Param('id') id: string) {
+    return this.service.hardDelete(id);
   }
 }
