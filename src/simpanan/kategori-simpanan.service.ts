@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/prisma/prisma.service';
 import { CreateKategoriSimpananDto } from './dto/create-kategori-simpanan.dto';
 import { UpdateKategoriSimpananDto } from './dto/update-kategori-simpanan.dto';
 
@@ -8,16 +8,15 @@ export class KategoriSimpananService {
   constructor(private prisma: PrismaService) {}
 
   findAll() {
-    return this.prisma.kategoriSimpanan.findMany();
+    return this.prisma.kategoriSimpanan.findMany({
+      where: { deleted_at: null },
+    });
   }
 
-  async findOne(id: string) {
-    const item = await this.prisma.kategoriSimpanan.findUnique({
-      where: { id },
+  findOne(id: string) {
+    return this.prisma.kategoriSimpanan.findFirst({
+      where: { id, deleted_at: null },
     });
-
-    if (!item) throw new NotFoundException('Kategori simpanan tidak ditemukan');
-    return item;
   }
 
   create(dto: CreateKategoriSimpananDto) {
@@ -26,18 +25,45 @@ export class KategoriSimpananService {
     });
   }
 
-  async update(id: string, dto: UpdateKategoriSimpananDto) {
-    await this.findOne(id); // cek dulu
+  update(id: string, dto: UpdateKategoriSimpananDto) {
     return this.prisma.kategoriSimpanan.update({
       where: { id },
       data: dto,
     });
   }
 
-  async remove(id: string) {
-    await this.findOne(id);
-    return this.prisma.kategoriSimpanan.delete({
+  /** ============= SOFT DELETE ============= */
+  async softDelete(id: string, deleted_by: string) {
+    // Cek data apakah ada
+    const existing = await this.prisma.kategoriSimpanan.findUnique({
       where: { id },
     });
+
+    if (!existing) {
+      throw new NotFoundException('Kategori tidak ditemukan');
+    }
+
+    // Soft delete
+    return this.prisma.kategoriSimpanan.update({
+      where: { id },
+      data: {
+        deleted_by,
+        deleted_at: new Date(),
+      },
+    });
   }
+  /** ============= PERMANENT DELETE ============= */
+async forceDelete(id: string) {
+  const existing = await this.prisma.kategoriSimpanan.findUnique({
+    where: { id },
+  });
+
+  if (!existing) throw new NotFoundException('Kategori tidak ditemukan');
+
+  return this.prisma.kategoriSimpanan.delete({
+    where: { id },
+  });
+}
+
+
 }

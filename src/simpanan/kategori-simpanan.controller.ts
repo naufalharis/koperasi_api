@@ -28,7 +28,13 @@ export class KategoriSimpananController {
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.service.remove(id);
+  remove(@Param('id') id: string, @Body('deleted_by') deleted_by: string) {
+    return this.service.softDelete(id, deleted_by);
   }
+  // PERMANENT DELETE
+@Delete('force/:id')
+forceDelete(@Param('id') id: string) {
+  return this.service.forceDelete(id);
+}
+
 }
