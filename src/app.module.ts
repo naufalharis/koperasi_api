@@ -11,6 +11,7 @@ import { KategoriJangkaWaktuModule } from './kategori-jangka-waktu/kategori-jang
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
+    PinjamanModule
   ],
   providers: [PrismaService],
 })
