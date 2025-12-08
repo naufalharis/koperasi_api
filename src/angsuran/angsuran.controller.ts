@@ -12,13 +12,13 @@ import {
 import { AngsuranService } from './angsuran.service';
 import { CreateAngsuranDto } from './dto/create-angsuran.dto';
 import { UpdateAngsuranDto } from './dto/update-angsuran.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('angsuran')
-@UseGuards(JwtAuthGuard)
 export class AngsuranController {
   constructor(private readonly angsuranService: AngsuranService) {}
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() dto: CreateAngsuranDto, @Request() req) {
     const userId = req.user.id; // dari JWT payload

@@ -1,14 +1,4 @@
-﻿import {
-  Controller,
-  Post,
-  Body,
-  UseGuards,
-  Request,
-  Get,
-  Param,
-  Put,
-  Delete
-} from '@nestjs/common';
+﻿import { Controller, Post, Body, UseGuards, Request, Get, Param, Put, Delete } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -28,58 +18,38 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // 🔒 Protected: lihat profil diri sendiri
+  // 🔐 Protected route: melihat profil
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {
     return req.user;
   }
 
-  // ✅ GET semua anggota aktif (tidak termasuk soft delete)
   @Get('anggota')
   async getAllAnggota() {
     return this.authService.findAll();
   }
 
-  // 🔒 GET by ID (aktif saja)
+  // 🔐 Protected route: lihat anggota by ID
   @UseGuards(JwtAuthGuard)
   @Get('anggota/:id')
   async getAnggotaById(@Param('id') id: string) {
     return this.authService.findById(id);
   }
 
-  // 🔒 UPDATE anggota
   @UseGuards(JwtAuthGuard)
   @Put('anggota/:id')
-  async updateAnggota(@Param('id') id: string, @Body() data: any) {
+  async updateAnggota(
+    @Param('id') id: string,
+    @Body() data: any,
+  ) {
     return this.authService.update(id, data);
   }
 
-  // 🔒 ❌ SOFT DELETE anggota
+  // ❌ DELETE ANGGOTA
   @UseGuards(JwtAuthGuard)
   @Delete('anggota/:id')
-  async softDeleteAnggota(@Param('id') id: string) {
-    return this.authService.softDelete(id);
-  }
-
-  // OPTIONAL: GET semua anggota termasuk yang sudah soft delete
-  @UseGuards(JwtAuthGuard)
-  @Get('anggota-all')
-  async getAllWithDeleted() {
-    return this.authService.findAllWithDeleted();
-  }
-
-  // OPTIONAL: GET hanya data yang soft delete
-  @UseGuards(JwtAuthGuard)
-  @Get('anggota-deleted')
-  async getDeletedOnly() {
-    return this.authService.findDeleted();
-  }
-
-  // OPTIONAL: Restore anggota yang soft delete
-  @UseGuards(JwtAuthGuard)
-  @Post('anggota/restore/:id')
-  async restoreAnggota(@Param('id') id: string) {
-    return this.authService.restore(id);
+  async deleteAnggota(@Param('id') id: string) {
+    return this.authService.delete(id);
   }
 }

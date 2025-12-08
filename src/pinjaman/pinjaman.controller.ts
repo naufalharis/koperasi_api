@@ -19,6 +19,8 @@ export class PinjamanController {
   }
 
   @Post(":id/cair")
+/*************  ✨ Windsurf Command ⭐  *************/
+/*******  beb1f2f7-3277-4866-a90e-32066983596d  *******/
   cairkan(@Param("id") id: string) {
     return this.service.cairkanPinjaman(id);
   }
