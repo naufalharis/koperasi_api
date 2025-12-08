@@ -1,4 +1,4 @@
-﻿import { Controller, Post, Body, UseGuards, Request, Get, Param, Put, Delete } from '@nestjs/common';
+﻿import { Controller, Post, Body, UseGuards, Request, Get, Param, Put, Delete, Patch } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LocalAuthGuard } from './guards/local-auth.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
@@ -18,19 +18,20 @@ export class AuthController {
     return this.authService.login(req.user);
   }
 
-  // 🔐 Protected route: melihat profil
+  // 🔐 Protected route: lihat profil
   @UseGuards(JwtAuthGuard)
   @Get('me')
   async getProfile(@Request() req) {
     return req.user;
   }
 
+  // Tidak pakai guard → bebas (opsional)
   @Get('anggota')
   async getAllAnggota() {
     return this.authService.findAll();
   }
 
-  // 🔐 Protected route: lihat anggota by ID
+  // 🔐 Lihat anggota by ID
   @UseGuards(JwtAuthGuard)
   @Get('anggota/:id')
   async getAnggotaById(@Param('id') id: string) {
@@ -46,10 +47,17 @@ export class AuthController {
     return this.authService.update(id, data);
   }
 
-  // ❌ DELETE ANGGOTA
+  // 🔥 Soft Delete
   @UseGuards(JwtAuthGuard)
   @Delete('anggota/:id')
   async deleteAnggota(@Param('id') id: string) {
     return this.authService.delete(id);
+  }
+
+  // 🔄 (Optional) Restore anggota
+  @UseGuards(JwtAuthGuard)
+  @Patch('anggota/:id/restore')
+  async restoreAnggota(@Param('id') id: string) {
+    return this.authService.restore(id);
   }
 }
