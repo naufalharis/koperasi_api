@@ -16,6 +16,14 @@ import { PrismaService } from './prisma/prisma.service';
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     AuthModule,
+    JabatanModule,
+    KasKoperasiModule,
+    KategoriJangkaWaktuModule,
+    PinjamanModule,
+    KategoriSimpananModule,
+    TabunganModule,
+    AngsuranModule,
+    PenarikanModule,
   ],
   providers: [PrismaService],
 })
