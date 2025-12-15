@@ -40,6 +40,19 @@ export class TabunganController {
     return this.tabunganService.update(id, dto, req?.user?.id);
   }
 
+  // 🔥 SOFT DELETE
+  @Delete(':id/soft')
+  softDelete(@Param('id') id: string, @Req() req: any) {
+    return this.tabunganService.softDelete(id, req?.user?.id);
+  }
+
+  // 🔥 HARD DELETE (hapus permanen)
+  @Delete(':id/hard')
+  hardDelete(@Param('id') id: string) {
+    return this.tabunganService.hardDelete(id);
+  }
+
+  // DELETE default (masih hard delete bawaan)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.tabunganService.remove(id);

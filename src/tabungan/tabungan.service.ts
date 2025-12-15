@@ -19,15 +19,18 @@ export class TabunganService {
     });
   }
 
-  async findAll() {
-    return this.prisma.tabungan.findMany({
-      orderBy: { tanggal: 'desc' },
-      include: {
-        anggota: true,
-        kategoriSimpanan: true,
-      }
-    });
-  }
+    async findAll() {
+      return this.prisma.tabungan.findMany({
+        where: {
+          deletedAt: null, // Hanya tampilin yang belum soft delete
+        },
+        orderBy: { tanggal: 'desc' },
+        include: {
+          anggota: true,
+          kategoriSimpanan: true,
+        },
+      });
+    }
 
   async findOne(id: string) {
     const data = await this.prisma.tabungan.findUnique({
@@ -62,4 +65,23 @@ export class TabunganService {
       where: { id }
     });
   }
+
+async softDelete(id: string, userId: string) {
+  return await this.prisma.tabungan.update({
+    where: { id },
+    data: {
+      deletedAt: new Date(),
+    },
+  });
+}
+
+async hardDelete(id: string) {
+  await this.findOne(id);
+
+  return this.prisma.tabungan.delete({
+    where: { id },
+  });
+}
+
+
 }
