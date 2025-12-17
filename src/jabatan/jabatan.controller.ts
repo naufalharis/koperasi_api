@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, Query } from '@nestjs/common';
 import { JabatanService } from './jabatan.service';
 import { CreateJabatanDto } from './dto/create-jabatan.dto';
 import { UpdateJabatanDto } from './dto/update-jabatan.dto';
@@ -12,14 +12,18 @@ export class JabatanController {
     return this.jabatanService.create(data);
   }
 
+  // support query param ?includeDeleted=true
   @Get()
-  findAll() {
-    return this.jabatanService.findAll();
+  findAll(@Query('includeDeleted') includeDeleted?: string) {
+    const inc = includeDeleted === 'true';
+    return this.jabatanService.findAll(inc);
   }
 
+  // optional: allow viewing deleted when ?includeDeleted=true
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.jabatanService.findOne(id);
+  findOne(@Param('id') id: string, @Query('includeDeleted') includeDeleted?: string) {
+    const inc = includeDeleted === 'true';
+    return this.jabatanService.findOne(id, inc);
   }
 
   @Patch(':id')
@@ -27,21 +31,21 @@ export class JabatanController {
     return this.jabatanService.update(id, data);
   }
 
-  // 🔥 Soft Delete (tidak benar-benar dihapus)
+  // Soft Delete (PATCH)
   @Patch(':id/soft-delete')
   softDelete(@Param('id') id: string, @Req() req: any) {
-    // pastikan req.user.id ada dari JWT guard
-    const userId = req.user?.id ?? 'system'; // fallback
+    const userId = req.user?.id ?? 'system';
     return this.jabatanService.softDelete(id, userId);
   }
 
-  // 🔄 Restore data
+  // Restore (PATCH)
   @Patch(':id/restore')
-  restore(@Param('id') id: string) {
-    return this.jabatanService.restore(id);
+  restore(@Param('id') id: string, @Req() req: any) {
+    const userId = req.user?.id ?? 'system';
+    return this.jabatanService.restore(id, userId);
   }
 
-  // ❌ Hard Delete
+  // Hard Delete
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.jabatanService.remove(id);

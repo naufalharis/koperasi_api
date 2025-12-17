@@ -62,8 +62,13 @@ model Anggota {
   pinjaman    Pinjaman[]
   penarikan   Penarikan[]
 
+  // relations for Kas (added)
+  kasCreated   KasKoperasi[] @relation("KasCreatedBy")
+  kasDeleted   KasKoperasi[] @relation("KasDeletedBy")
+
   @@map("anggota")
 }
+
 
 // =======================
 // 💰 Tabungan & Penarikan
@@ -188,13 +193,21 @@ model KasKoperasi {
   nominal     Float
   tanggal     DateTime
 
+  note        String?              // tambahan: keterangan / note
+
   created_at  DateTime  @default(now())
   updated_at  DateTime  @updatedAt
+
+  // audit fields (ids)
   created_by  String?
   updated_by  String?
   deleted_at  DateTime?
+  deleted_by  String?
+
+  // relations to Anggota (optional convenience)
+  createdBy   Anggota?  @relation("KasCreatedBy", fields: [created_by], references: [id], onDelete: SetNull)
+  deletedBy   Anggota?  @relation("KasDeletedBy", fields: [deleted_by], references: [id], onDelete: SetNull)
 
   @@map("kas_koperasi")
 }
-
 

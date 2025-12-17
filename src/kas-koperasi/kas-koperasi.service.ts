@@ -1,3 +1,4 @@
+// src/kas-koperasi/kas-koperasi.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateKasDto } from './dto/create-kas.dto';
@@ -13,10 +14,14 @@ export class KasKoperasiService {
     const data: any = {
       nominal: createKasDto.nominal,
       tanggal: new Date(createKasDto.tanggal),
-      // note: createKasDto.note ?? null,
+      note: createKasDto.note ?? null,
       created_by: userId ?? null,
     };
-    return this.prisma.kasKoperasi.create({ data });
+    const created = await this.prisma.kasKoperasi.create({
+      data,
+      include: { createdBy: { select: { id: true, nama: true } } },
+    });
+    return created;
   }
 
   // findAll: exclude deleted by default, support pagination/filter/sort
@@ -54,6 +59,7 @@ export class KasKoperasiService {
         skip,
         take: perPage,
         orderBy: { [sortField]: sortOrder },
+        include: { createdBy: { select: { id: true, nama: true } } },
       }),
       this.prisma.kasKoperasi.count({ where }),
     ]);
@@ -73,7 +79,10 @@ export class KasKoperasiService {
     const where: any = { id };
     if (!includeDeleted) where.deleted_at = null;
 
-    const item = await this.prisma.kasKoperasi.findFirst({ where });
+    const item = await this.prisma.kasKoperasi.findFirst({
+      where,
+      include: { createdBy: { select: { id: true, nama: true } } },
+    });
     if (!item) throw new NotFoundException(`Kas dengan id ${id} tidak ditemukan`);
     return item;
   }
@@ -85,19 +94,24 @@ export class KasKoperasiService {
     const data: any = {};
     if (updateKasDto.nominal !== undefined) data.nominal = updateKasDto.nominal;
     if (updateKasDto.tanggal !== undefined) data.tanggal = new Date(updateKasDto.tanggal as any);
-    // if (updateKasDto.note !== undefined) data.note = updateKasDto.note;
+    if (updateKasDto.note !== undefined) data.note = updateKasDto.note;
 
     data.updated_by = userId ?? null;
 
-    return this.prisma.kasKoperasi.update({ where: { id }, data });
-  }
-
-  // soft-delete: set deleted_at + updated_by
-  async remove(id: string, userId?: string) {
-    await this.findOne(id); // pastikan ada & tidak already deleted
     return this.prisma.kasKoperasi.update({
       where: { id },
-      data: { deleted_at: new Date(), updated_by: userId ?? null },
+      data,
+      include: { createdBy: { select: { id: true, nama: true } } },
+    });
+  }
+
+  // soft-delete: set deleted_at + deleted_by + updated_by
+  async remove(id: string, userId?: string) {
+    await this.findOne(id);
+    return this.prisma.kasKoperasi.update({
+      where: { id },
+      data: { deleted_at: new Date(), deleted_by: userId ?? null, updated_by: userId ?? null },
+      include: { createdBy: { select: { id: true, nama: true } } },
     });
   }
 
@@ -107,7 +121,8 @@ export class KasKoperasiService {
     if (!item || !item.deleted_at) throw new NotFoundException(`Kas tidak dalam keadaan terhapus`);
     return this.prisma.kasKoperasi.update({
       where: { id },
-      data: { deleted_at: null, updated_by: userId ?? null },
+      data: { deleted_at: null, deleted_by: null, updated_by: userId ?? null },
+      include: { createdBy: { select: { id: true, nama: true } } },
     });
   }
 
