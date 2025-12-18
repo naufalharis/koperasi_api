@@ -5,41 +5,76 @@ const prisma = new PrismaClient();
 
 async function main() {
   const hashPassword = async (password: string): Promise<string> => {
-    const saltRounds = 10;
-    return await bcrypt.hash(password, saltRounds);
+    return bcrypt.hash(password, 10);
   };
 
-  // === Pastikan jabatan "Admin" ada ===
-  let jabatan = await prisma.jabatan.findFirst({
-    where: { nama: 'Admin' },
-  });
+  const jabatanNamaList = ['Owner', 'Teller', 'Nasabah'];
+  const jabatanMap: Record<string, any> = {};
 
-  if (!jabatan) {
-    jabatan = await prisma.jabatan.create({
-      data: { nama: 'Admin' },
+  for (const nama of jabatanNamaList) {
+    let jabatan = await prisma.jabatan.findFirst({
+      where: { nama },
     });
+
+    if (!jabatan) {
+      jabatan = await prisma.jabatan.create({
+        data: { nama },
+      });
+      console.log(`✅ Jabatan ${nama} dibuat`);
+    } else {
+      console.log(`ℹ️ Jabatan ${nama} sudah ada`);
+    }
+
+    jabatanMap[nama] = jabatan;
   }
 
-  // === Buat user admin ===
-  const adminEmail = 'admin@koperasi.com';
-  const existingAdmin = await prisma.anggota.findUnique({
-    where: { email: adminEmail },
-  });
+  const anggotaList = [
+    {
+      nama: 'Owner',
+      email: 'owner@koperasi.com',
+      password: 'password123',
+      jabatan: 'Owner',
+      alamat: 'Jl. Sudirman No. 10',
+      no_hp: '08123456780',
+    },
+    {
+      nama: 'Teller',
+      email: 'teller@koperasi.com',
+      password: 'password123',
+      jabatan: 'Teller',
+      alamat: 'Jl. Ahmad Yani No. 5',
+      no_hp: '08123456781',
+    },
+    {
+      nama: 'Nasabah',
+      email: 'nasabah@koperasi.com',
+      password: 'password123',
+      jabatan: 'Nasabah',
+      alamat: 'Jl. Kenanga No. 3',
+      no_hp: '08123456782',
+    },
+  ];
 
-  if (!existingAdmin) {
-    const anggota = await prisma.anggota.create({
-      data: {
-        nama: 'Admin Koperasi',
-        email: adminEmail,
-        password: await hashPassword('password123'),
-        id_jabatan: jabatan.id,
-        alamat: 'Jl. Merdeka No. 1',
-        no_hp: '08123456789',
-      },
+  for (const data of anggotaList) {
+    const existing = await prisma.anggota.findUnique({
+      where: { email: data.email },
     });
-    console.log('✅ Admin baru dibuat:', anggota);
-  } else {
-    console.log('ℹ️ Admin sudah ada, skip create.');
+
+    if (!existing) {
+      await prisma.anggota.create({
+        data: {
+          nama: data.nama,
+          email: data.email,
+          password: await hashPassword(data.password),
+          id_jabatan: jabatanMap[data.jabatan].id,
+          alamat: data.alamat,
+          no_hp: data.no_hp,
+        },
+      });
+      console.log(`✅ Anggota baru dibuat: ${data.email}`);
+    } else {
+      console.log(`ℹ️ Anggota ${data.email} sudah ada, skip create`);
+    }
   }
 }
 
@@ -51,4 +86,3 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
-
